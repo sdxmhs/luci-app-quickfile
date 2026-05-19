@@ -18,12 +18,18 @@ jobs:
 
       - name: Download Snapshot SDK and Compile
         run: |
-          # 【关键修改】由于 Snapshot 的 SDK 文件名随解析度动态变化，用 curl 自动抓取最新的 SDK 文件名
-          SDK_FILE=$(curl -s https://downloads.openwrt.org/snapshots/targets/x86/64/sha256sums | grep -o "openwrt-sdk-.*\.tar\.xz" | head -n 1)
+          # 【修复 1】使用 grep -oE 增加对 .zst 格式的正则匹配兼容
+          SDK_FILE=$(curl -s https://downloads.openwrt.org/snapshots/targets/x86/64/sha256sums | grep -oE "openwrt-sdk-.*\.tar\.(xz|zst)" | head -n 1)
+          
+          # 打印一下获取到的文件名，方便在 Action 日志里排错
+          echo "Found SDK file: $SDK_FILE"
+          
+          # 下载 SDK
           wget "https://downloads.openwrt.org/snapshots/targets/x86/64/$SDK_FILE"
           
           mkdir sdk
-          tar -xJf openwrt-sdk-*.tar.xz --strip-components=1 -C sdk
+          # 【修复 2】将原本的 tar -xJf 改为 tar -xf（去掉强制 xz 解压的 J 参数，让 tar 自动根据文件头判断）
+          tar -xf "$SDK_FILE" --strip-components=1 -C sdk
           cd sdk
           
           ./scripts/feeds update -a
@@ -37,13 +43,4 @@ jobs:
           
           ./scripts/feeds install -a
           make defconfig
-          
-          # 开始编译，新版 SDK 会自动输出为 .apk 格式
           make package/luci-app-quickfile/compile V=s
-
-      - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: openwrt-quickfile-apk
-          # 自动收集 bin 目录下所有生成的 .apk 文件（包含 luci-app 和 quickfile 两个包）
-          path: sdk/bin/**/*.apk
