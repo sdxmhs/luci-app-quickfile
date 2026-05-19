@@ -26,16 +26,15 @@ jobs:
           rm -rf feeds/telephony
           ./scripts/feeds install -a || ./scripts/feeds install -a || ./scripts/feeds install -a
           
-          # 【已修正】使用 wget 下载 main 分支源码，一次性解压出两个所需目录
           wget -qO- https://github.com/sbwml/luci-app-quickfile/archive/refs/heads/main.tar.gz | tar -xz
-          
-          # GitHub 打包的压缩包解压后默认带有 "仓库名-分支名" 的外层文件夹
-          # 将解压出来的两个组件目录移动到 package 中
           mv luci-app-quickfile-main/luci-app-quickfile package/
           mv luci-app-quickfile-main/quickfile package/
-          
-          # 清理掉多余的外层文件夹
           rm -rf luci-app-quickfile-main
           
           ./scripts/feeds install -a
+          
+          # 【新增关键步骤】生成默认配置文件，防止触发交互式 menuconfig
+          make defconfig
+          
+          # 现在可以安全地进行单包编译了
           make package/luci-app-quickfile/compile V=s
