@@ -1,0 +1,10 @@
+on:
+  workflow_dispatch:
+    inputs:
+      install_quickfile:
+        description: '是否安装 Quickfile 插件'
+        required: false
+        default: 'true'
+- name: Run DIY Part 1
+  if: github.event.inputs.install_quickfile == 'true'
+  run: bash diy-part1.sh
