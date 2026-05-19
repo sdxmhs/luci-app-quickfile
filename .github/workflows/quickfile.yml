@@ -38,3 +38,9 @@ jobs:
           
           # 现在可以安全地进行单包编译了
           make package/luci-app-quickfile/compile V=s
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: openwrt-packages
+          path: sdk/bin/
