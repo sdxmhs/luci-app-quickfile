@@ -1,3 +1,5 @@
+name: Build OpenWrt  # 工作流名称
+
 on:
   workflow_dispatch:
     inputs:
@@ -5,8 +7,20 @@ on:
         description: '是否安装 Quickfile 插件'
         required: false
         default: 'true'
-- name: Run DIY Part 1
-      if: github.event.inputs.install_quickfile == 'true'
-      run: |
-        chmod +x diy-part1.sh
-        ./diy-part1.sh
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04  # 或你的运行环境
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 下面是你要修改的部分
+      - name: Run DIY Part 1
+        if: github.event.inputs.install_quickfile == 'true'
+        run: |
+          chmod +x diy-part1.sh
+          ./diy-part1.sh
+
+      - name: Update Feeds
+        run: ./scripts/feeds update -a
