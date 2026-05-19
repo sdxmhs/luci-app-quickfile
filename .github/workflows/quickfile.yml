@@ -17,27 +17,19 @@ jobs:
 
       - name: Download SDK and Compile
         run: |
-          # 1. 下载并解压 SDK
           wget https://downloads.openwrt.org/releases/23.05.3/targets/x86/64/openwrt-sdk-23.05.3-x86-64_gcc-12.3.0_musl.Linux-x86_64.tar.xz
-          
-          # 显式创建一个 sdk 目录并解压进去
           mkdir sdk
           tar -xJf openwrt-sdk-*.tar.xz --strip-components=1 -C sdk
-          
-          # 2. 进入 SDK 目录
           cd sdk
-
-          # 3. 更新基础 feeds
+          
           ./scripts/feeds update -a
           ./scripts/feeds install -a
-
-          # 4. 下载你的插件源码
+          
+          # 使用 wget 替换 git clone
           mkdir -p package/luci-app-quickfile
-          git clone https://github.com/sbwml/luci-app-quickfile package/luci-app-quickfile
-          git clone https://github.com/sbwml/quickfile package/quickfile
-
-          # 5. 安装插件所需的依赖
+          mkdir -p package/quickfile
+          wget -qO- https://github.com/sbwml/luci-app-quickfile/archive/refs/heads/master.tar.gz | tar -xz -C package/luci-app-quickfile --strip-components=1
+          wget -qO- https://github.com/sbwml/quickfile/archive/refs/heads/master.tar.gz | tar -xz -C package/quickfile --strip-components=1
+          
           ./scripts/feeds install -a
-
-          # 6. 编译插件
           make package/luci-app-quickfile/compile V=s
