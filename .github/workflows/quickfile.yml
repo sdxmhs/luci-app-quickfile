@@ -19,8 +19,10 @@ jobs:
       - name: Run DIY Part 1
         if: github.event.inputs.install_quickfile == 'true'
         run: |
-          chmod +x diy-part1.sh
-          ./diy-part1.sh
+          echo "Checking file existence:"
+          ls -la diy-part1.sh
+          echo "Running script:"
+          bash -x diy-part1.sh
 
       - name: Update Feeds
         run: ./scripts/feeds update -a
