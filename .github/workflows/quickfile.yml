@@ -41,15 +41,3 @@ jobs:
 
           # 6. 编译插件
           make package/luci-app-quickfile/compile V=s
-
-      - name: Compile Package
-        run: |
-          cd sdk
-          # 添加插件到 package 目录
-          git clone https://github.com/sbwml/luci-app-quickfile package/luci-app-quickfile
-          git clone https://github.com/sbwml/quickfile package/quickfile
-          
-          # 生成配置文件
-          make defconfig
-          # 编译插件
-          make package/luci-app-quickfile/compile V=s
