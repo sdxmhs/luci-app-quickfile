@@ -1,29 +1,40 @@
-name: Build OpenWrt  # 工作流名称
+name: Build IPK
 
 on:
   workflow_dispatch:
-    inputs:
-      install_quickfile:
-        description: '是否安装 Quickfile 插件'
-        required: false
-        default: 'true'
 
 jobs:
   build:
-    runs-on: ubuntu-22.04  # 或你的运行环境
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Run DIY Part 1
-        if: github.event.inputs.install_quickfile == 'true'
+      - name: Install Dependencies
         run: |
-          chmod +x diy-part1.sh
-          bash diy-part1.sh
+          sudo apt-get update
+          sudo apt-get install -y build-essential libncurses5-dev gawk git subversion libssl-dev gettext zlib1g-dev libsqlite3-dev wget
 
-      # 移除 working-directory，让它直接在当前根目录运行
-      - name: Update Feeds
-        run: ./scripts/feeds update -a
+      - name: Download SDK
+        run: |
+          # 请根据你的路由器架构（如 x86_64, ath79 等）修改链接
+          # 这里以 x86_64 为例
+          wget https://downloads.openwrt.org/releases/23.05.3/targets/x86/64/openwrt-sdk-23.05.3-x86-64_gcc-12.3.0_musl.Linux-x86_64.tar.xz
+          tar -xJf openwrt-sdk-*.tar.xz
+          mv openwrt-sdk-* sdk
+          cd sdk
+          # 准备 feeds
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
 
-      - name: Install Feeds
-        run: ./scripts/feeds install -a
+      - name: Compile Package
+        run: |
+          cd sdk
+          # 添加插件到 package 目录
+          git clone https://github.com/sbwml/luci-app-quickfile package/luci-app-quickfile
+          git clone https://github.com/sbwml/quickfile package/quickfile
+          
+          # 生成配置文件
+          make defconfig
+          # 编译插件
+          make package/luci-app-quickfile/compile V=s
