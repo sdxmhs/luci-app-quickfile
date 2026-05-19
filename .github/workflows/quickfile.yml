@@ -21,9 +21,11 @@ jobs:
           chmod +x diy-part1.sh
           bash diy-part1.sh
 
-      # 在这里运行 feeds 相关操作，系统会自动进入正确的源码目录
       - name: Update Feeds
+        # 假设你的 OpenWrt 源码放在 openwrt 目录下（请根据你的仓库实际情况调整）
+        working-directory: openwrt  
         run: ./scripts/feeds update -a
 
       - name: Install Feeds
+        working-directory: openwrt
         run: ./scripts/feeds install -a
