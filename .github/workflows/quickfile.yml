@@ -21,11 +21,9 @@ jobs:
           chmod +x diy-part1.sh
           bash diy-part1.sh
 
+      # 移除 working-directory，让它直接在当前根目录运行
       - name: Update Feeds
-        # 假设你的 OpenWrt 源码放在 openwrt 目录下（请根据你的仓库实际情况调整）
-        working-directory: openwrt  
         run: ./scripts/feeds update -a
 
       - name: Install Feeds
-        working-directory: openwrt
         run: ./scripts/feeds install -a
