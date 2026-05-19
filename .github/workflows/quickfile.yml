@@ -19,8 +19,12 @@ jobs:
       - name: Run DIY Part 1
         if: github.event.inputs.install_quickfile == 'true'
         run: |
+          # 删除 Windows 换行符
+          sed -i 's/\r$//' Auto-OpenWrt-build-x86-64.sh
+          
           chmod +x diy-part1.sh
-          ./luci-app-quickfile/diy-part1.sh
+          cp diy-part1.sh imagebuilder/
+          cd imagebuilder
 
       - name: Update Feeds
         run: ./scripts/feeds update -a
