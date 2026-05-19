@@ -20,7 +20,7 @@ jobs:
         if: github.event.inputs.install_quickfile == 'true'
         run: |
           # 删除 Windows 换行符
-          sed -i 's/\r$//' Auto-OpenWrt-build-x86-64.sh
+          sed -i 's/\r$//' diy-part1.sh
           
           chmod +x diy-part1.sh
           cp diy-part1.sh imagebuilder/
