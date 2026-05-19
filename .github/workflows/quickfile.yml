@@ -23,7 +23,7 @@ jobs:
           cd sdk
           
           ./scripts/feeds update -a
-          ./scripts/feeds install -a
+          ./scripts/feeds install -a || ./scripts/feeds install -a || ./scripts/feeds install -a
           
           # 使用 wget 替换 git clone
           mkdir -p package/luci-app-quickfile
