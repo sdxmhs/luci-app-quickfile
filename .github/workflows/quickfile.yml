@@ -23,6 +23,7 @@ jobs:
           cd sdk
           
           ./scripts/feeds update -a
+          rm -rf feeds/telephony
           ./scripts/feeds install -a || ./scripts/feeds install -a || ./scripts/feeds install -a
           
           # 使用 wget 替换 git clone
