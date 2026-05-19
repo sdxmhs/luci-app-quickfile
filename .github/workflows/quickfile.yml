@@ -15,14 +15,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 下面是你要修改的部分
       - name: Run DIY Part 1
         if: github.event.inputs.install_quickfile == 'true'
         run: |
-          echo "Checking file existence:"
-          ls -la diy-part1.sh
-          echo "Running script:"
-          bash -x diy-part1.sh
+          chmod +x diy-part1.sh
+          bash diy-part1.sh
 
+      # 在这里运行 feeds 相关操作，系统会自动进入正确的源码目录
       - name: Update Feeds
         run: ./scripts/feeds update -a
+
+      - name: Install Feeds
+        run: ./scripts/feeds install -a
