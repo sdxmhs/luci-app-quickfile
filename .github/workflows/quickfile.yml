@@ -15,17 +15,32 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential libncurses5-dev gawk git subversion libssl-dev gettext zlib1g-dev libsqlite3-dev wget
 
-      - name: Download SDK
+      - name: Download SDK and Compile
         run: |
-          # 请根据你的路由器架构（如 x86_64, ath79 等）修改链接
-          # 这里以 x86_64 为例
+          # 1. 下载并解压 SDK
           wget https://downloads.openwrt.org/releases/23.05.3/targets/x86/64/openwrt-sdk-23.05.3-x86-64_gcc-12.3.0_musl.Linux-x86_64.tar.xz
-          tar -xJf openwrt-sdk-*.tar.xz
-          mv openwrt-sdk-* sdk
+          
+          # 显式创建一个 sdk 目录并解压进去
+          mkdir sdk
+          tar -xJf openwrt-sdk-*.tar.xz --strip-components=1 -C sdk
+          
+          # 2. 进入 SDK 目录
           cd sdk
-          # 准备 feeds
+
+          # 3. 更新基础 feeds
           ./scripts/feeds update -a
           ./scripts/feeds install -a
+
+          # 4. 下载你的插件源码
+          mkdir -p package/luci-app-quickfile
+          git clone https://github.com/sbwml/luci-app-quickfile package/luci-app-quickfile
+          git clone https://github.com/sbwml/quickfile package/quickfile
+
+          # 5. 安装插件所需的依赖
+          ./scripts/feeds install -a
+
+          # 6. 编译插件
+          make package/luci-app-quickfile/compile V=s
 
       - name: Compile Package
         run: |
