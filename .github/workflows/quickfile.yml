@@ -19,12 +19,8 @@ jobs:
       - name: Run DIY Part 1
         if: github.event.inputs.install_quickfile == 'true'
         run: |
-          # 删除 Windows 换行符
-          sed -i 's/\r$//' diy-part1.sh
-          
           chmod +x diy-part1.sh
-          cp diy-part1.sh imagebuilder/
-          cd imagebuilder
+          ./diy-part1.sh
 
       - name: Update Feeds
         run: ./scripts/feeds update -a
