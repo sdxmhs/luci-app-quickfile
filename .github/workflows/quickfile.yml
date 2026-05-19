@@ -6,5 +6,7 @@ on:
         required: false
         default: 'true'
 - name: Run DIY Part 1
-  if: github.event.inputs.install_quickfile == 'true'
-  run: bash diy-part1.sh
+      if: github.event.inputs.install_quickfile == 'true'
+      run: |
+        chmod +x diy-part1.sh
+        ./diy-part1.sh
