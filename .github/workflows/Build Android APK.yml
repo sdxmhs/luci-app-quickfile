@@ -1,7 +1,11 @@
-name: Build APK
+name: Build APK and Release
 
 on:
   workflow_dispatch:
+
+# 【新增】赋予 GITHUB_TOKEN 写入仓库内容的权限，才能创建 Release
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -13,22 +17,16 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          # 新版 SDK 额外需要 zstd 等解压工具
           sudo apt-get install -y build-essential libncurses5-dev gawk git subversion libssl-dev gettext zlib1g-dev libsqlite3-dev wget curl zstd
 
       - name: Download Snapshot SDK and Compile
         run: |
-          # 【修复 1】使用 grep -oE 增加对 .zst 格式的正则匹配兼容
           SDK_FILE=$(curl -s https://downloads.openwrt.org/snapshots/targets/x86/64/sha256sums | grep -oE "openwrt-sdk-.*\.tar\.(xz|zst)" | head -n 1)
-          
-          # 打印一下获取到的文件名，方便在 Action 日志里排错
           echo "Found SDK file: $SDK_FILE"
           
-          # 下载 SDK
           wget "https://downloads.openwrt.org/snapshots/targets/x86/64/$SDK_FILE"
           
           mkdir sdk
-          # 【修复 2】将原本的 tar -xJf 改为 tar -xf（去掉强制 xz 解压的 J 参数，让 tar 自动根据文件头判断）
           tar -xf "$SDK_FILE" --strip-components=1 -C sdk
           cd sdk
           
@@ -45,11 +43,18 @@ jobs:
           make defconfig
           make package/luci-app-quickfile/compile V=s
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+      - name: Organize Release Files
+        run: |
+          mkdir -p release_apks
+          find sdk/bin/ -type f -name "luci-app-quickfile*.apk" -exec cp {} release_apks/ \;
+          find sdk/bin/ -type f -name "luci-i18n-quickfile*.apk" -exec cp {} release_apks/ \;
+          find sdk/bin/ -type f -name "quickfile*.apk" -exec cp {} release_apks/ \;
+
+      # 使用插件自动创建 Release 并上传刚刚提取的文件
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: openwrt-quickfile-apk
-          path: |
-            sdk/bin/**/luci-app-quickfile*.apk
-            sdk/bin/**/luci-i18n-quickfile*.apk
-            sdk/bin/**/quickfile*.apk
+          tag_name: v${{ github.run_number }}
+          name: "QuickFile 自动编译版 (Build ${{ github.run_number }})"
+          body: "自动编译的 OpenWrt Snapshot APK 安装包。"
+          files: release_apks/*.apk
