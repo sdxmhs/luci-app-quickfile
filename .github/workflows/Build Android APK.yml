@@ -49,5 +49,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: openwrt-quickfile-apk
-          # 使用 **/*.apk 可以强迫 GitHub 递归扫描 bin 目录下的所有子文件夹，把所有生成的 apk 全抓出来
-          path: sdk/bin/**/*.apk
+          path: |
+            sdk/bin/**/luci-app-quickfile*.apk
+            sdk/bin/**/luci-i18n-quickfile*.apk
+            sdk/bin/**/quickfile*.apk
